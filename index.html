@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mapa Interactivo</title>
+    <style>
+        #map {
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+        #search-box {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            width: 300px;
+            height: 30px;
+            padding: 5px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <input id="search-box" type="text" placeholder="Buscar dirección">
+    <div id="map"></div>
+
+    <!-- Reemplaza YOUR_API_KEY con tu clave de API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAHB3N2CLyuGYEWdSCCHvmFfVx83ejvQSQ&libraries=places"></script>
+    <script>
+        function initMap() {
+            const map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 13,
+                center: { lat: -33.4489, lng: -70.6693 }, // Coordenadas de Santiago, Chile
+                mapTypeId: 'roadmap'
+            });
+
+            const futureHubs = [
+                { name: "Las Rejas", lat: -33.456, lng: -70.719 },
+                { name: "Ciudad del Niño", lat: -33.501, lng: -70.651 },
+                { name: "Florida Center", lat: -33.511, lng: -70.602 },
+                { name: "Portal el Llano", lat: -33.482, lng: -70.640 },
+                { name: "Alto San Francisco", lat: -33.443, lng: -70.653 },
+                { name: "Nathaniel Cox", lat: -33.451, lng: -70.655 },
+                { name: "Vicuña Mackenna", lat: -33.458, lng: -70.641 },
+                { name: "Ñuble", lat: -33.464, lng: -70.631 },
+                { name: "Independencia", lat: -33.416, lng: -70.657 }
+            ];
+
+            const currentHubs = [
+                { name: "Hub Actual 1", lat: -33.430, lng: -70.651 },
+                { name: "Hub Actual 2", lat: -33.450, lng: -70.650 },
+                // Añadir más hubs actuales aquí
+            ];
+
+            // Añadir marcadores para hubs futuros
+            futureHubs.forEach(location => {
+                new google.maps.Marker({
+                    position: { lat: location.lat, lng: location.lng },
+                    map: map,
+                    title: location.name,
+                    icon: {
+                        url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png" // Icono azul para hubs futuros
+                    }
+                });
+            });
+
+            // Añadir marcadores para hubs actuales
+            currentHubs.forEach(location => {
+                new google.maps.Marker({
+                    position: { lat: location.lat, lng: location.lng },
+                    map: map,
+                    title: location.name,
+                    icon: {
+                        url: "http://maps.google.com/mapfiles/ms/icons/red-dot.png" // Icono rojo para hubs actuales
+                    }
+                });
+            });
+
+            const input = document.getElementById('search-box');
+            const searchBox = new google.maps.places.SearchBox(input);
+
+            map.controls[google.maps.ControlPosition.TOP_CENTER].push(input);
+
+            searchBox.addListener('places_changed', () => {
+                const places = searchBox.getPlaces();
+
+                if (places.length === 0) {
+                    return;
+                }
+
+                places.forEach(place => {
+                    if (!place.geometry) {
+                        return;
+                    }
+
+                    new google.maps.Marker({
+                        map,
+                        title: place.name,
+                        position: place.geometry.location
+                    });
+
+                    map.setCenter(place.geometry.location);
+                });
+            });
+        }
+
+        google.maps.event.addDomListener(window, 'load', initMap);
+    </script>
+</body>
+</html>
